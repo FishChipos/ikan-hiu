@@ -1,5 +1,5 @@
 
-> Open this page at [https://fishchipos.github.io/ikan-hiu/](https://fishchipos.github.io/ikan-hiu/)
+Made for the 2022 international R4M competition, specifically the micro:bit line following car.
 
 ## Use as Extension
 
@@ -17,13 +17,6 @@ To edit this repository in MakeCode.
 * open [https://makecode.microbit.org/](https://makecode.microbit.org/)
 * click on **Import** then click on **Import URL**
 * paste **https://github.com/fishchipos/ikan-hiu** and click import
-
-## Blocks preview
-
-This image shows the blocks code from the last commit in master.
-This image may take a few minutes to refresh.
-
-![A rendered view of the blocks](https://github.com/fishchipos/ikan-hiu/raw/master/.github/makecode/blocks.png)
 
 #### Metadata (used for search, rendering)
 
