@@ -7,8 +7,8 @@ def turn_left():
 
     while True:
         basic.show_number(counter)
-        sensors.dd_mmotor(gb1_direction, 1, gb1_speed, turn_speed)
-        sensors.dd_mmotor(gb2_direction, 1, gb2_speed, turn_speed)
+        sensors.dd_mmotor(gb1_direction, 1, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.dd_mmotor(gb2_direction, 1, gb2_speed, turn_speed + turn_speed_offset2)
 
         if (counter >= 2 and pins.digital_read_pin(ir1) == 0):    
             sensors.dd_mmotor(gb1_direction, 1, gb1_speed, 0)
@@ -27,8 +27,8 @@ def turn_right():
 
     while True:
         basic.show_number(counter)
-        sensors.dd_mmotor(gb1_direction, 0, gb1_speed, turn_speed)
-        sensors.dd_mmotor(gb2_direction, 0, gb2_speed, turn_speed)
+        sensors.dd_mmotor(gb1_direction, 0, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.dd_mmotor(gb2_direction, 0, gb2_speed, turn_speed + turn_speed_offset2)
 
         if (counter >= 2 and pins.digital_read_pin(ir2) == 0):
             sensors.dd_mmotor(gb1_direction, 1, gb1_speed, 0)
@@ -44,24 +44,24 @@ def turn_right():
 # Adjust angle so that the car is straight
 def adjust_left():
     while (pins.digital_read_pin(ir1) == 1 and pins.digital_read_pin(ir2) == 0):
-        sensors.dd_mmotor(gb1_direction, 1, gb1_speed, turn_speed)
-        sensors.dd_mmotor(gb2_direction, 1, gb2_speed, turn_speed)
+        sensors.dd_mmotor(gb1_direction, 1, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.dd_mmotor(gb2_direction, 1, gb2_speed, turn_speed + turn_speed_offset2)
 
     sensors.dd_mmotor(gb1_direction, 0, gb1_speed, 0)
     sensors.dd_mmotor(gb2_direction, 0, gb2_speed, 0)
     
 def adjust_right():
     while (pins.digital_read_pin(ir1) == 0 and pins.digital_read_pin(ir2) == 1):
-        sensors.dd_mmotor(gb1_direction, 0, gb1_speed, turn_speed)
-        sensors.dd_mmotor(gb2_direction, 0, gb2_speed, turn_speed)
+        sensors.dd_mmotor(gb1_direction, 0, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.dd_mmotor(gb2_direction, 0, gb2_speed, turn_speed + turn_speed_offset2)
 
     sensors.dd_mmotor(gb1_direction, 0, gb1_speed, 0)
     sensors.dd_mmotor(gb2_direction, 0, gb2_speed, 0)
 
 
 def forward(time):
-    sensors.dd_mmotor(gb1_direction, 0, gb1_speed, speed)
-    sensors.dd_mmotor(gb2_direction, 1, gb2_speed, speed)
+    sensors.dd_mmotor(gb1_direction, 0, gb1_speed, speed + speed_offset1)
+    sensors.dd_mmotor(gb2_direction, 1, gb2_speed, speed + speed_offset2)
     basic.pause(time)
 
     # Car is angled too far to the right
@@ -75,8 +75,8 @@ def forward(time):
         adjust_right()
 
 def back(time):
-    sensors.dd_mmotor(gb1_direction, 1, gb1_speed, speed)
-    sensors.dd_mmotor(gb2_direction, 0, gb2_speed, speed)
+    sensors.dd_mmotor(gb1_direction, 1, gb1_speed, speed + speed_offset1)
+    sensors.dd_mmotor(gb2_direction, 0, gb2_speed, speed + speed_offset2)
     basic.pause(time)
 
     # Car is angled too far to the right
@@ -164,8 +164,14 @@ gb1_direction = AnalogPin.P13
 gb2_speed = AnalogPin.P16
 gb2_direction = AnalogPin.P15
 
+# Speeds and offsets incase one side is faster then the other (they are)
 speed = 75
+speed_offset1 = 0
+speed_offset2 = 0
+
 turn_speed = 200
+turn_speed_offset1 = 0
+turn_speed_offset2 = 0
 
 active = False
 
