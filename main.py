@@ -1,3 +1,4 @@
+# Black magic don't touch
 pins.set_pull(DigitalPin.P20, PinPullMode.PULL_UP)
 
 # Utility

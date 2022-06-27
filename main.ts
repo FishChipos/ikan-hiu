@@ -1,3 +1,4 @@
+//  Black magic don't touch
 pins.setPull(DigitalPin.P20, PinPullMode.PullUp)
 //  Utility
 //  Turn left 90 degrees
