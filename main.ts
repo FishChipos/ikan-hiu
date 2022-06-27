@@ -1,48 +1,35 @@
+//  NOTES:
+//  1 is left, 0 is right
 //  Black magic don't touch
 pins.setPull(DigitalPin.P20, PinPullMode.PullUp)
 //  Utility
-//  Turn left 90 degrees
-function turn_left() {
+//  Turn left or right ROUGHLY 90 degrees
+function turn(direction: number) {
+    let read: number;
     let counter = 0
     while (true) {
+        //  If left
+        if (direction == 0) {
+            read = pins.digitalReadPin(ir2)
+        } else {
+            //  If right
+            read = pins.digitalReadPin(ir1)
+        }
+        
         basic.showNumber(counter)
-        sensors.DDMmotor(gb1_direction, 1, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.DDMmotor(gb2_direction, 1, gb2_speed, turn_speed + turn_speed_offset2)
-        if (counter >= 2 && pins.digitalReadPin(ir1) == 0) {
+        sensors.DDMmotor(gb1_direction, direction, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.DDMmotor(gb2_direction, direction, gb2_speed, turn_speed + turn_speed_offset2)
+        if (counter >= 2 && read == 0) {
             sensors.DDMmotor(gb1_direction, 1, gb1_speed, 0)
             sensors.DDMmotor(gb2_direction, 1, gb2_speed, 0)
             break
         }
         
-        if (counter == 0 && pins.digitalReadPin(ir1) == 0) {
+        if (counter == 0 && read == 0) {
             counter = 1
         }
         
-        if (counter == 1 && pins.digitalReadPin(ir1) == 1) {
-            counter = 2
-        }
-        
-    }
-}
-
-//  Turn right 90 degrees
-function turn_right() {
-    let counter = 0
-    while (true) {
-        basic.showNumber(counter)
-        sensors.DDMmotor(gb1_direction, 0, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.DDMmotor(gb2_direction, 0, gb2_speed, turn_speed + turn_speed_offset2)
-        if (counter >= 2 && pins.digitalReadPin(ir2) == 0) {
-            sensors.DDMmotor(gb1_direction, 1, gb1_speed, 0)
-            sensors.DDMmotor(gb2_direction, 1, gb2_speed, 0)
-            break
-        }
-        
-        if (counter == 0 && pins.digitalReadPin(ir2) == 0) {
-            counter = 1
-        }
-        
-        if (counter == 1 && pins.digitalReadPin(ir2) == 1) {
+        if (counter == 1 && read == 1) {
             counter = 2
         }
         
@@ -50,19 +37,10 @@ function turn_right() {
 }
 
 //  Adjust angle so that the car is straight
-function adjust_left() {
-    while (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 0) {
-        sensors.DDMmotor(gb1_direction, 1, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.DDMmotor(gb2_direction, 1, gb2_speed, turn_speed + turn_speed_offset2)
-    }
-    sensors.DDMmotor(gb1_direction, 0, gb1_speed, 0)
-    sensors.DDMmotor(gb2_direction, 0, gb2_speed, 0)
-}
-
-function adjust_right() {
-    while (pins.digitalReadPin(ir1) == 0 && pins.digitalReadPin(ir2) == 1) {
-        sensors.DDMmotor(gb1_direction, 0, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.DDMmotor(gb2_direction, 0, gb2_speed, turn_speed + turn_speed_offset2)
+function adjust_angle(direction: number) {
+    while (pins.digitalReadPin(ir1) == direction && pins.digitalReadPin(ir2) == 1 - direction) {
+        sensors.DDMmotor(gb1_direction, direction, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.DDMmotor(gb2_direction, direction, gb2_speed, turn_speed + turn_speed_offset2)
     }
     sensors.DDMmotor(gb1_direction, 0, gb1_speed, 0)
     sensors.DDMmotor(gb2_direction, 0, gb2_speed, 0)
@@ -75,13 +53,13 @@ function forward(time: number) {
     //  Car is angled too far to the right
     if (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 0) {
         stop()
-        adjust_left()
+        adjust_angle(1)
     }
     
     //  Car is angled too far to the left
     if (pins.digitalReadPin(ir1) == 0 && pins.digitalReadPin(ir2) == 1) {
         stop()
-        adjust_right()
+        adjust_angle(0)
     }
     
 }
@@ -93,13 +71,13 @@ function back(time: number) {
     //  Car is angled too far to the right
     if (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 0) {
         stop()
-        adjust_left()
+        adjust_angle(1)
     }
     
     //  Car is angled too far to the left
     if (pins.digitalReadPin(ir1) == 0 && pins.digitalReadPin(ir2) == 1) {
         stop()
-        adjust_right()
+        adjust_angle(0)
     }
     
 }
@@ -113,42 +91,42 @@ function stop() {
 function first() {
     forward(1200)
     stop()
-    turn_left()
+    turn(1)
     basic.pause(2000)
     forward(2000)
     stop()
     back(3000)
     forward(1000)
     stop()
-    turn_right()
+    turn(0)
 }
 
 function second() {
     forward(100)
     stop()
-    turn_left()
+    turn(1)
     forward(2500)
     stop()
     back(2500)
-    turn_right()
+    turn(0)
 }
 
 function third() {
     forward(100)
     stop()
-    turn_left()
+    turn(1)
     forward(2000)
     stop()
     back(4000)
     forward(1000)
     stop()
-    turn_right()
+    turn(0)
 }
 
 function fourth() {
     forward(100)
     stop()
-    turn_left()
+    turn(1)
     back(1000)
     stop()
     forward(3500)

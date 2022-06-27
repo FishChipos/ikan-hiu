@@ -1,64 +1,46 @@
+# NOTES:
+# 1 is left, 0 is right
+
 # Black magic don't touch
 pins.set_pull(DigitalPin.P20, PinPullMode.PULL_UP)
 
 # Utility
-# Turn left 90 degrees
-def turn_left():
+# Turn left or right ROUGHLY 90 degrees
+def turn(direction):
     counter = 0
 
     while True:
-        basic.show_number(counter)
-        sensors.dd_mmotor(gb1_direction, 1, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.dd_mmotor(gb2_direction, 1, gb2_speed, turn_speed + turn_speed_offset2)
+        # If left
+        if (direction == 0):
+            read = pins.digital_read_pin(ir2)
 
-        if (counter >= 2 and pins.digital_read_pin(ir1) == 0):    
+        # If right
+        else:
+            read = pins.digital_read_pin(ir1)
+
+        basic.show_number(counter)
+        sensors.dd_mmotor(gb1_direction, direction, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.dd_mmotor(gb2_direction, direction, gb2_speed, turn_speed + turn_speed_offset2)
+
+        if (counter >= 2 and read == 0):    
             sensors.dd_mmotor(gb1_direction, 1, gb1_speed, 0)
             sensors.dd_mmotor(gb2_direction, 1, gb2_speed, 0)
             break
 
-        if (counter == 0 and pins.digital_read_pin(ir1) == 0):
+        if (counter == 0 and read == 0):
             counter = 1
 
-        if (counter == 1 and pins.digital_read_pin(ir1) == 1):
-            counter = 2
-
-# Turn right 90 degrees
-def turn_right():
-    counter = 0
-
-    while True:
-        basic.show_number(counter)
-        sensors.dd_mmotor(gb1_direction, 0, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.dd_mmotor(gb2_direction, 0, gb2_speed, turn_speed + turn_speed_offset2)
-
-        if (counter >= 2 and pins.digital_read_pin(ir2) == 0):
-            sensors.dd_mmotor(gb1_direction, 1, gb1_speed, 0)
-            sensors.dd_mmotor(gb2_direction, 1, gb2_speed, 0)
-            break
-
-        if (counter == 0 and pins.digital_read_pin(ir2) == 0):
-            counter = 1
-
-        if (counter == 1 and pins.digital_read_pin(ir2) == 1):
+        if (counter == 1 and read == 1):
             counter = 2
 
 # Adjust angle so that the car is straight
-def adjust_left():
-    while (pins.digital_read_pin(ir1) == 1 and pins.digital_read_pin(ir2) == 0):
-        sensors.dd_mmotor(gb1_direction, 1, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.dd_mmotor(gb2_direction, 1, gb2_speed, turn_speed + turn_speed_offset2)
+def adjust_angle(direction):
+    while (pins.digital_read_pin(ir1) == direction and pins.digital_read_pin(ir2) == 1 - direction):
+        sensors.dd_mmotor(gb1_direction, direction, gb1_speed, turn_speed + turn_speed_offset1)
+        sensors.dd_mmotor(gb2_direction, direction, gb2_speed, turn_speed + turn_speed_offset2)
 
     sensors.dd_mmotor(gb1_direction, 0, gb1_speed, 0)
     sensors.dd_mmotor(gb2_direction, 0, gb2_speed, 0)
-    
-def adjust_right():
-    while (pins.digital_read_pin(ir1) == 0 and pins.digital_read_pin(ir2) == 1):
-        sensors.dd_mmotor(gb1_direction, 0, gb1_speed, turn_speed + turn_speed_offset1)
-        sensors.dd_mmotor(gb2_direction, 0, gb2_speed, turn_speed + turn_speed_offset2)
-
-    sensors.dd_mmotor(gb1_direction, 0, gb1_speed, 0)
-    sensors.dd_mmotor(gb2_direction, 0, gb2_speed, 0)
-
 
 def forward(time):
     sensors.dd_mmotor(gb1_direction, 0, gb1_speed, speed + speed_offset1)
@@ -68,12 +50,12 @@ def forward(time):
     # Car is angled too far to the right
     if (pins.digital_read_pin(ir1) == 1 and pins.digital_read_pin(ir2) == 0):
         stop()
-        adjust_left()
+        adjust_angle(1)
 
     # Car is angled too far to the left
     if (pins.digital_read_pin(ir1) == 0 and pins.digital_read_pin(ir2) == 1):
         stop()
-        adjust_right()
+        adjust_angle(0)
 
 def back(time):
     sensors.dd_mmotor(gb1_direction, 1, gb1_speed, speed + speed_offset1)
@@ -83,12 +65,12 @@ def back(time):
     # Car is angled too far to the right
     if (pins.digital_read_pin(ir1) == 1 and pins.digital_read_pin(ir2) == 0):
         stop()
-        adjust_left()
+        adjust_angle(1)
 
     # Car is angled too far to the left
     if (pins.digital_read_pin(ir1) == 0 and pins.digital_read_pin(ir2) == 1):
         stop()
-        adjust_right()
+        adjust_angle(0)
 
 def stop():    
     sensors.dd_mmotor(gb1_direction, 0, gb1_speed, 0)
@@ -98,7 +80,7 @@ def stop():
 def first():
     forward(1200)
     stop()
-    turn_left()
+    turn(1)
 
     basic.pause(2000)
 
@@ -111,24 +93,24 @@ def first():
 
     stop()
 
-    turn_right()
+    turn(0)
 
 def second():
     forward(100)
     stop()
-    turn_left()
+    turn(1)
     forward(2500)
 
 
     stop()
     back(2500)
 
-    turn_right()
+    turn(0)
 
 def third():
     forward(100)
     stop()
-    turn_left()
+    turn(1)
 
 
     forward(2000)
@@ -140,12 +122,12 @@ def third():
 
     stop()
 
-    turn_right()
+    turn(0)
 
 def fourth():
     forward(100)
     stop()
-    turn_left()
+    turn(1)
     back(1000)
 
     stop()
