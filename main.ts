@@ -1,36 +1,35 @@
 //  NOTES:
-//  1 is left, 0 is right
+//  1 is left and back, 0 is right and front
 //  Black magic don't touch
 pins.setPull(DigitalPin.P20, PinPullMode.PullUp)
 //  Utility
 //  Turn left or right ROUGHLY 90 degrees
 function turn(direction: number) {
-    let read: number;
-    let counter = 0
+    let ir1_read: number;
+    let ir2_read: number;
+    let counter1 = 0
+    let counter2 = 0
     while (true) {
-        //  If left
-        if (direction == 0) {
-            read = pins.digitalReadPin(ir2)
-        } else {
-            //  If right
-            read = pins.digitalReadPin(ir1)
-        }
-        
-        basic.showNumber(counter)
+        basic.showNumber(counter1)
         sensors.DDMmotor(gb1_direction, direction, gb1_speed, turn_speed + turn_speed_offset1)
         sensors.DDMmotor(gb2_direction, direction, gb2_speed, turn_speed + turn_speed_offset2)
-        if (counter >= 2 && read == 0) {
-            sensors.DDMmotor(gb1_direction, 1, gb1_speed, 0)
-            sensors.DDMmotor(gb2_direction, 1, gb2_speed, 0)
+        ir1_read = pins.digitalReadPin(ir1)
+        ir2_read = pins.digitalReadPin(ir2)
+        if (counter1 + counter2 >= 4 && !ir1_read && !ir2_read) {
+            stop()
             break
         }
         
-        if (counter == 0 && read == 0) {
-            counter = 1
+        if (ir1_read == 0 && counter1 == 0) {
+            counter1 = 1
+        } else if (ir1_read == 1 && counter1 == 1) {
+            counter1 = 2
         }
         
-        if (counter == 1 && read == 1) {
-            counter = 2
+        if (ir2_read == 0 && counter2 == 0) {
+            counter2 = 1
+        } else if (ir2_read == 1 && counter2 == 1) {
+            counter2 = 2
         }
         
     }
@@ -46,40 +45,30 @@ function adjust_angle(direction: number) {
     sensors.DDMmotor(gb2_direction, 0, gb2_speed, 0)
 }
 
-function forward(time: number) {
-    sensors.DDMmotor(gb1_direction, 0, gb1_speed, speed + speed_offset1)
-    sensors.DDMmotor(gb2_direction, 1, gb2_speed, speed + speed_offset2)
-    basic.pause(time)
-    //  Car is angled too far to the right
-    if (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 0) {
-        stop()
-        adjust_angle(1)
+function move(direction: number, time: number = 100) {
+    let lastTime = timeanddate.secondsSinceReset() * 1000
+    let currTime = timeanddate.secondsSinceReset() * 1000
+    let elapsed = 0
+    while (elapsed <= time) {
+        sensors.DDMmotor(gb1_direction, direction, gb1_speed, speed + speed_offset1)
+        sensors.DDMmotor(gb2_direction, 1 - direction, gb2_speed, speed + speed_offset2)
+        //  Time since last iteration
+        currTime = timeanddate.secondsSinceReset() * 1000
+        elapsed += currTime - lastTime
+        lastTime = currTime
+        //  Car is angled too far to the right
+        if (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 0) {
+            stop()
+            adjust_angle(1)
+        }
+        
+        //  Car is angled too far to the left
+        if (pins.digitalReadPin(ir1) == 0 && pins.digitalReadPin(ir2) == 1) {
+            stop()
+            adjust_angle(0)
+        }
+        
     }
-    
-    //  Car is angled too far to the left
-    if (pins.digitalReadPin(ir1) == 0 && pins.digitalReadPin(ir2) == 1) {
-        stop()
-        adjust_angle(0)
-    }
-    
-}
-
-function back(time: number) {
-    sensors.DDMmotor(gb1_direction, 1, gb1_speed, speed + speed_offset1)
-    sensors.DDMmotor(gb2_direction, 0, gb2_speed, speed + speed_offset2)
-    basic.pause(time)
-    //  Car is angled too far to the right
-    if (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 0) {
-        stop()
-        adjust_angle(1)
-    }
-    
-    //  Car is angled too far to the left
-    if (pins.digitalReadPin(ir1) == 0 && pins.digitalReadPin(ir2) == 1) {
-        stop()
-        adjust_angle(0)
-    }
-    
 }
 
 function stop() {
@@ -89,48 +78,15 @@ function stop() {
 
 //  For each intersection
 function first() {
-    forward(1200)
     stop()
     turn(1)
     basic.pause(2000)
-    forward(2000)
+    move(0, 2000)
     stop()
-    back(3000)
-    forward(1000)
-    stop()
-    turn(0)
-}
-
-function second() {
-    forward(100)
-    stop()
-    turn(1)
-    forward(2500)
-    stop()
-    back(2500)
-    turn(0)
-}
-
-function third() {
-    forward(100)
-    stop()
-    turn(1)
-    forward(2000)
-    stop()
-    back(4000)
-    forward(1000)
+    move(1, 3000)
+    move(0, 3000)
     stop()
     turn(0)
-}
-
-function fourth() {
-    forward(100)
-    stop()
-    turn(1)
-    back(1000)
-    stop()
-    forward(3500)
-    stop()
 }
 
 //  Pins
@@ -158,21 +114,24 @@ while (true) {
     
     if (active) {
         //  Move forward a little bit
-        forward(100)
+        move(0)
         //  If both sensors detect black then it is an intersection
         if (pins.digitalReadPin(ir1) == 1 && pins.digitalReadPin(ir2) == 1) {
             intersectionCount += 1
             if (intersectionCount == 1) {
                 first()
             } else if (intersectionCount == 2) {
-                second()
+                
             } else if (intersectionCount == 3) {
-                second()
+                //  second()
+                
             } else if (intersectionCount == 4) {
-                third()
+                //  second()
+                
             } else if (intersectionCount == 5) {
+                //  third()
                 //  Last intersection so we're done
-                fourth()
+                //  fourth()
                 break
             }
             

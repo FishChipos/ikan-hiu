@@ -5,7 +5,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "sensors": "github:gigotoys/gigo-block#42e48e853c87813ab0148b44b47b6279d797ba5e"
+        "sensors": "github:gigotoys/gigo-block#42e48e853c87813ab0148b44b47b6279d797ba5e",
+        "microbit-pxt-timeanddate": "github:bsiever/microbit-pxt-timeanddate#v2.0.25"
     },
     "files": [
         "main.ts",
