@@ -6,12 +6,14 @@
         "radio": "*",
         "microphone": "*",
         "sensors": "github:gigotoys/gigo-block#42e48e853c87813ab0148b44b47b6279d797ba5e",
-        "microbit-pxt-timeanddate": "github:bsiever/microbit-pxt-timeanddate#v2.0.25"
+        "microbit-pxt-timeanddate": "github:bsiever/microbit-pxt-timeanddate#v2.0.25",
+        "ds1307": "github:tinkertanker/pxt-realtimeclock-ds1307#cac7e9e8edf290e6f12cb3920f014c20d39feb58"
     },
     "files": [
         "main.ts",
         "README.md",
-        "main.py"
+        "main.py",
+        null
     ],
     "testFiles": [
         "test.ts"
